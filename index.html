@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Inteligente - Ahora Play</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: #161d2f;
+            --accent-primary: #38bdf8;
+            --accent-secondary: #818cf8;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --youtube: #ff0000;
+            --tiktok: #00f2ea;
+            --instagram: #e1306c;
+            --twitter: #ffffff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --success: #10b981;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); padding: 2rem; display: flex; justify-content: center; }
+        .container { max-width: 1400px; width: 100%; }
+
+        header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;
+            background: var(--glass); padding: 1.5rem 2rem; border-radius: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-area h1 {
+            font-size: 1.8rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 3rem; }
+        .card { background: var(--card-bg); border-radius: 1.5rem; padding: 2rem; border: 1px solid var(--glass); position: relative; height: 100%; }
+        .metric-big { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .metric-label { color: var(--text-dim); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        .tabs { display: flex; gap: 0.8rem; margin-bottom: 2rem; overflow-x: auto; padding-bottom: 0.5rem; }
+        .tab {
+            padding: 0.8rem 1.5rem; background: var(--glass); border-radius: 1rem; cursor: pointer;
+            transition: 0.3s; border: 1px solid transparent; white-space: nowrap; font-weight: 600;
+        }
+        .tab.active { background: rgba(56, 189, 248, 0.1); border-color: var(--accent-primary); color: var(--accent-primary); }
+
+        .section-view { display: none; }
+        .section-view.active { display: block; animation: slideUp 0.5s ease-out; }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .ranking-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+        .ranking-item:last-child { border-bottom: none; }
+        .item-title { font-size: 0.85rem; font-weight: 600; padding-right: 1rem; }
+        .item-stat { font-weight: 700; color: var(--accent-primary); font-size: 0.9rem; white-space: nowrap; }
+
+        .grid-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 1.5rem; }
+        .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        .grid-demographics { display: grid; grid-template-columns: 1fr 1.5fr; gap: 2rem; margin-top: 1rem; }
+        
+        @media (max-width: 1100px) { .grid-3col, .grid-1-2, .grid-demographics { grid-template-columns: 1fr; } }
+        
+        canvas { width: 100% !important; max-height: 400px; }
+        .demographic-label { color: var(--text-dim); font-size: 0.75rem; margin-bottom: 1rem; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-area">
+                <h1>Ahora Play Dashboard</h1>
+                <p style="color: var(--text-dim); font-size: 0.9rem;">Periodo: 28 de Abril - 04 de Mayo, 2026</p>
+            </div>
+            <div style="text-align: right">
+                <p style="font-size: 0.8rem; color: var(--text-dim)">Última actualización: Hoy</p>
+                <span style="color: var(--success); font-size: 0.7rem;">● DATOS OPTIMIZADOS</span>
+            </div>
+        </header>
+
+        <div class="tabs">
+            <div class="tab active" onclick="showSection('summary', this)">General</div>
+            <div class="tab" onclick="showSection('youtube', this)">YouTube</div>
+            <div class="tab" onclick="showSection('tiktok', this)">TikTok</div>
+            <div class="tab" onclick="showSection('instagram', this)">Instagram</div>
+            <div class="tab" onclick="showSection('twitter', this)">Twitter (X)</div>
+        </div>
+
+        <!-- SECCIÓN: GENERAL -->
+        <div id="section-summary" class="section-view active">
+            <div class="summary-grid">
+                <div class="card">
+                    <span class="metric-label">Vistas Totales</span>
+                    <div class="metric-big">132,582</div>
+                    <span style="color: var(--success)">↑ 18% vs anterior</span>
+                </div>
+                <div class="card">
+                    <span class="metric-label">Publicaciones Totales</span>
+                    <div class="metric-big">84</div>
+                    <span style="color: var(--accent-primary)">Posts esta semana</span>
+                </div>
+                <div class="card">
+                    <span class="metric-label">Red Líder</span>
+                    <div class="metric-big" style="color: var(--tiktok)">TikTok</div>
+                    <span style="color: var(--text-dim)">Mayor crecimiento</span>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Evolución de Tráfico Multi-Red</h3>
+                <canvas id="mainChart"></canvas>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: YOUTUBE -->
+        <div id="section-youtube" class="section-view">
+            <div class="summary-grid">
+                <div class="card"><span class="metric-label">Suscriptores Totales</span><div class="metric-big">214,200</div></div>
+                <div class="card"><span class="metric-label">Watch Minutes</span><div class="metric-big">494.3k</div></div>
+                <div class="card"><span class="metric-label">Nuevos Subs</span><div class="metric-big">+342</div></div>
+            </div>
+            
+            <div class="grid-3col">
+                <div class="card"><h3>Top 6 Videos</h3><div id="yt-videos-ranking"></div></div>
+                <div class="card"><h3>Top 5 Vivos (Retención)</h3><div id="yt-vivos-ranking"></div></div>
+                <div class="card"><h3>Top 5 Shorts</h3><div id="yt-shorts-ranking"></div></div>
+            </div>
+
+            <div class="grid-1-2">
+                <div class="card">
+                    <h3>Fuentes de Tráfico</h3>
+                    <canvas id="ytSourceChart" style="max-height: 250px;"></canvas>
+                </div>
+                <div class="card">
+                    <h3>Demografía de Audiencia</h3>
+                    <div class="grid-demographics">
+                        <div>
+                            <p class="demographic-label">Género</p>
+                            <canvas id="ytGenderChart" style="max-height: 200px;"></canvas>
+                        </div>
+                        <div>
+                            <p class="demographic-label">Distribución por Edad</p>
+                            <canvas id="ytAgeChart" style="max-height: 200px;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: TIKTOK -->
+        <div id="section-tiktok" class="section-view">
+            <div class="summary-grid">
+                <div class="card"><span class="metric-label">Seguidores Totales</span><div class="metric-big">142,500</div></div>
+                <div class="card"><span class="metric-label">Finalización</span><div class="metric-big">12.5%</div></div>
+                <div class="card"><span class="metric-label">Nuevos Seguidores</span><div class="metric-big">+1,204</div></div>
+            </div>
+            <div class="card"><h3>Top Videos TikTok</h3><div id="tt-ranking"></div></div>
+            <div class="card" style="margin-top: 1.5rem">
+                <h3>Demografía: Sexo y Edad</h3>
+                <div class="grid-demographics">
+                    <div><p class="demographic-label">Distribución por Sexo</p><canvas id="ttGenderChart"></canvas></div>
+                    <div><p class="demographic-label">Distribución por Edad</p><canvas id="ttAgeChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: INSTAGRAM -->
+        <div id="section-instagram" class="section-view">
+            <div class="summary-grid">
+                <div class="card"><span class="metric-label">Seguidores Totales</span><div class="metric-big">45,800</div></div>
+                <div class="card"><span class="metric-label">Reels Reach</span><div class="metric-big">85.4k</div></div>
+                <div class="card"><span class="metric-label">Interacciones</span><div class="metric-big">4,281</div></div>
+            </div>
+            <div class="card"><h3>Eficiencia de Reels</h3><canvas id="igChart"></canvas></div>
+            <div class="card" style="margin-top: 1.5rem">
+                <h3>Demografía: Sexo y Edad</h3>
+                <div class="grid-demographics">
+                    <div><p class="demographic-label">Distribución por Sexo</p><canvas id="igGenderChart"></canvas></div>
+                    <div><p class="demographic-label">Distribución por Edad</p><canvas id="igAgeChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: TWITTER -->
+        <div id="section-twitter" class="section-view">
+            <div class="summary-grid">
+                <div class="card"><span class="metric-label">Seguidores Totales</span><div class="metric-big">23,300</div></div>
+                <div class="card"><span class="metric-label">Impresiones</span><div class="metric-big">8,420</div></div>
+                <div class="card"><span class="metric-label">Reposts (RT)</span><div class="metric-big">156</div></div>
+            </div>
+            <div class="card"><h3>Top 5 Posts (Engagement)</h3><div id="tw-ranking"></div></div>
+            <div class="card" style="margin-top: 1.5rem">
+                <h3>Fuentes y Difusión</h3>
+                <div class="grid-demographics" style="grid-template-columns: 1fr 1.5fr;">
+                    <div>
+                        <p class="demographic-label">Fuentes de Tráfico</p>
+                        <canvas id="twSourceChart" style="max-height: 250px;"></canvas>
+                    </div>
+                    <div>
+                        <p class="demographic-label">Top 5 Posts con más Retweets</p>
+                        <div id="tw-rt-ranking"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const backupData = {
+            main: {
+                labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab', 'Dom'],
+                yt: [5000, 7000, 8000, 6000, 12000, 15000, 10000],
+                tt: [12000, 15000, 10000, 18000, 22000, 25000, 21000],
+                ig: [2000, 3000, 2500, 4000, 6000, 5000, 4500],
+                tw: [1000, 1200, 800, 1500, 2000, 1800, 1600]
+            },
+            demographics: {
+                ageLabels: ['18-24', '25-34', '35-44', '45-54', '55+'],
+                yt: { gender: [72, 28], age: [18, 35, 25, 12, 10] },
+                tt: { gender: [58, 42], age: [45, 25, 10, 15, 5] },
+                ig: { gender: [45, 55], age: [30, 40, 15, 10, 5] },
+                tw: { gender: [80, 20], age: [15, 40, 30, 10, 5] }
+            },
+            youtube: {
+                videos: [
+                    { title: "¿POR QUÉ EL DÓLAR ESTÁ BAJANDO?", val: "18.4k" },
+                    { title: "EL FUTURO DE LOS SALARIOS", val: "12.1k" },
+                    { title: "INFLACIÓN: EL DATO QUE NADIE VIO", val: "10.5k" },
+                    { title: "ANÁLISIS POLÍTICO CON SIETECASE", val: "9.2k" },
+                    { title: "TODO SOBRE EL NUEVO CEPO", val: "8.7k" },
+                    { title: "CAPUTO Y EL FMI: LA VERDAD", val: "7.1k" }
+                ],
+                vivos: [
+                    { title: "MAXI MEDIODÍA - Dólar", val: "42m" },
+                    { title: "SERRUCHO ECONÓMICO", val: "38m" },
+                    { title: "CIERRE DE MERCADO", val: "35m" },
+                    { title: "ENEMIGOS DEL REY", val: "31m" },
+                    { title: "NUEVO DINERO", val: "28m" }
+                ],
+                shorts: [
+                    { title: "MILEI ADAPTA O QUIEBRA", val: "16.5k" },
+                    { title: "GERCHUNOFF DÓLAR", val: "9.7k" },
+                    { title: "REDRADO CASUALIDAD", val: "8.6k" },
+                    { title: "ECONOMÍA MILEI II", val: "7.8k" },
+                    { title: "EDMAR BACHA ÉXITO", val: "5.9k" }
+                ]
+            },
+            twitter: {
+                posts: [
+                    { title: "HILO: El dólar no baja de 1000", val: "1.2k" },
+                    { title: "ENTREVISTA: Redrado con Maxi", val: "950" },
+                    { title: "VIDEO: Milei en Ahora Play", val: "840" },
+                    { title: "ANÁLISIS: Inflación de Mayo", val: "760" },
+                    { title: "INFO: Nuevos horarios", val: "520" }
+                ],
+                retweets: [
+                    { title: "Dólar y Salarios: El análisis de Maxi", val: "142 RTs" },
+                    { title: "Urgente: Nuevas medidas del BCRA", val: "98 RTs" },
+                    { title: "Milei sobre el futuro de la casta", val: "85 RTs" },
+                    { title: "Redrado: El cepo debe terminar", val: "64 RTs" },
+                    { title: "Nueva programación de Ahora Play", val: "42 RTs" }
+                ]
+            }
+        };
+
+        function showSection(id, element) {
+            document.querySelectorAll('.section-view').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('section-' + id).classList.add('active');
+            if (element) element.classList.add('active');
+            renderCharts(id);
+        }
+
+        function renderCharts(id) {
+            if (id === 'summary') renderMainChart();
+            if (id === 'youtube') { renderYoutubeCharts(); renderDemographics('yt'); }
+            if (id === 'tiktok') { renderTiktokCharts(); renderDemographics('tt'); }
+            if (id === 'instagram') { renderInstagramCharts(); renderDemographics('ig'); }
+            if (id === 'twitter') { renderTwitterCharts(); }
+        }
+
+        function renderMainChart() {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            if (window.mChart) window.mChart.destroy();
+            window.mChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: backupData.main.labels,
+                    datasets: [
+                        { label: 'TikTok', data: backupData.main.tt, borderColor: '#00f2ea', backgroundColor: 'rgba(0, 242, 234, 0.1)', fill: true, tension: 0.4 },
+                        { label: 'YouTube', data: backupData.main.yt, borderColor: '#ff0000', tension: 0.4 },
+                        { label: 'Instagram', data: backupData.main.ig, borderColor: '#e1306c', tension: 0.4 },
+                        { label: 'Twitter', data: backupData.main.tw, borderColor: '#ffffff', tension: 0.4 }
+                    ]
+                },
+                options: { responsive: true, plugins: { legend: { labels: { color: '#fff' } } } }
+            });
+        }
+
+        function renderDemographics(net) {
+            const gCtx = document.getElementById(net + 'GenderChart').getContext('2d');
+            new Chart(gCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['H', 'M'],
+                    datasets: [{ data: backupData.demographics[net].gender, backgroundColor: ['#38bdf8', '#e1306c'], borderWidth: 0 }]
+                },
+                options: { plugins: { legend: { position: 'bottom', labels: { color: '#fff', font: {size: 10} } } } }
+            });
+
+            const aCtx = document.getElementById(net + 'AgeChart').getContext('2d');
+            new Chart(aCtx, {
+                type: 'bar',
+                data: {
+                    labels: backupData.demographics.ageLabels,
+                    datasets: [{ data: backupData.demographics[net].age, backgroundColor: 'rgba(56, 189, 248, 0.5)', borderRadius: 4 }]
+                },
+                options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { ticks: { color: '#94a3b8', font: { size: 9 } } } } }
+            });
+        }
+
+        function renderYoutubeCharts() {
+            const ctx = document.getElementById('ytSourceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Búsqueda', 'Sugeridos', 'Directo'],
+                    datasets: [{ data: [45, 30, 25], backgroundColor: ['#38bdf8', '#818cf8', '#1e293b'], borderWidth: 0 }]
+                },
+                options: { plugins: { legend: { position: 'bottom', labels: { color: '#fff', font: {size: 10} } } } }
+            });
+            fillRanking('yt-videos-ranking', backupData.youtube.videos);
+            fillRanking('yt-vivos-ranking', backupData.youtube.vivos);
+            fillRanking('yt-shorts-ranking', backupData.youtube.shorts);
+        }
+
+        function renderTiktokCharts() {
+            const ttData = [
+                { title: "¿DÓNDE VAN LOS DÓLARES?", val: "11.2k" },
+                { title: "CONFESIÓN GERCHUNOFF", val: "10.6k" },
+                { title: "MILEI INFLACIÓN", val: "8.7k" },
+                { title: "DIVORCIO REALIDAD", val: "7.3k" },
+                { title: "ROBERTO PIAZZA", val: "6.3k" }
+            ];
+            fillRanking('tt-ranking', ttData);
+        }
+
+        function renderInstagramCharts() {
+            const ctx = document.getElementById('igChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Reel A', 'Reel B', 'Reel C', 'Reel D'],
+                    datasets: [{ label: 'Alcance', data: [8500, 6200, 9100, 5400], backgroundColor: '#e1306c' }]
+                }
+            });
+        }
+
+        function renderTwitterCharts() {
+            const ctx = document.getElementById('twSourceChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Feed', 'Búsqueda', 'Perfil'],
+                    datasets: [{ data: [60, 25, 15], backgroundColor: ['#1d9bf0', '#38bdf8', '#1e293b'], borderWidth: 0 }]
+                },
+                options: { plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } } }
+            });
+            fillRanking('tw-ranking', backupData.twitter.posts);
+            fillRanking('tw-rt-ranking', backupData.twitter.retweets);
+        }
+
+        function fillRanking(id, data) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.innerHTML = '';
+            data.forEach(item => {
+                el.innerHTML += `<div class="ranking-item"><span class="item-title">${item.title}</span><span class="item-stat">${item.val}</span></div>`;
+            });
+        }
+
+        window.onload = () => {
+            renderMainChart();
+            renderTiktokCharts();
+        };
+    </script>
+</body>
+</html>
